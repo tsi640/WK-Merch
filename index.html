@@ -11,6 +11,21 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>Bitte JavaScript aktivieren, um die Waldkirche-Abstimmung zu öffnen.</noscript>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // If the React bundle fails to load (e.g. raw source uploaded to Pages),
+      // explain the issue rather than leaving voters on an empty white screen.
+      window.setTimeout(function () {
+        var root = document.getElementById('root');
+        if (root && !root.hasChildNodes()) {
+          root.innerHTML = '<main style="max-width:650px;margin:10vh auto;padding:32px;font:18px/1.55 system-ui,sans-serif;color:#243b32">' +
+            '<h1 style="font-size:30px">Waldkirche-Abstimmung kann nicht geladen werden</h1>' +
+            '<p>Die Website wurde möglicherweise ohne den erforderlichen Build veröffentlicht. Bitte das Merch-Team informieren.</p>' +
+            '<p style="font-size:15px">Für die Einrichtung: GitHub → Settings → Pages → Source: <strong>GitHub Actions</strong>. Danach unter Actions prüfen, ob „Website veröffentlichen“ erfolgreich war.</p>' +
+            '</main>';
+        }
+      }, 5000);
+    </script>
   </body>
 </html>
