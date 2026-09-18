@@ -1,0 +1,1246 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#F7F7F2">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <title>Waldkirche – Merch-Abstimmung</title>
+
+  <!-- Offizieller Supabase JavaScript CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --bg: #F7F7F2;
+      --surface: #FFFFFF;
+      --ink: #1B2820;
+      --muted: #516057;
+      --border: #D8DED5;
+      --forest: #214A36;
+      --forest-dark: #173828;
+      --green: #17663C;
+      --red: #AF2735;
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont,
+                   "Segoe UI", Arial, sans-serif;
+      font-size: 20px;
+      line-height: 1.35;
+      touch-action: manipulation;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:focus-visible {
+      outline: 5px solid #3973D5;
+      outline-offset: 4px;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .shell {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 28px 40px 34px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      padding-bottom: 19px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .brand {
+      font-size: clamp(25px, 3vw, 36px);
+      font-weight: 850;
+      letter-spacing: -1.2px;
+    }
+
+    .brand span {
+      color: var(--forest);
+      font-weight: 450;
+    }
+
+    .mode {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 5px 12px;
+      background: #E5EEE6;
+      border-radius: 50px;
+      color: var(--forest-dark);
+      font-size: 16px;
+      font-weight: 750;
+    }
+
+    .progress-label {
+      font-size: 22px;
+      font-weight: 750;
+      text-align: right;
+    }
+
+    .progress-bars {
+      display: flex;
+      justify-content: flex-end;
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    .progress-bars span {
+      width: 65px;
+      height: 8px;
+      border-radius: 20px;
+      background: var(--border);
+    }
+
+    .progress-bars span.active {
+      background: var(--forest);
+    }
+
+    .intro {
+      text-align: center;
+      margin: 22px auto 24px;
+      max-width: 1000px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(32px, 4vw, 48px);
+      letter-spacing: -1.3px;
+      line-height: 1.12;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(20px, 2.3vw, 27px);
+      font-weight: 500;
+    }
+
+    .basic-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      align-items: stretch;
+      gap: 24px;
+      max-width: 1110px;
+      margin: 0 auto;
+    }
+
+    .preview {
+      position: relative;
+      overflow: hidden;
+      background: #E9E9E1;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      min-width: 0;
+    }
+
+    .preview img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .basic-preview {
+      height: min(48vh, 410px);
+      min-height: 280px;
+    }
+
+    .basic-actions {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .decision {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      min-height: 126px;
+      padding: 18px;
+      border: 0;
+      border-radius: 22px;
+      color: #FFFFFF;
+      font-size: clamp(25px, 2.6vw, 34px);
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .decision.yes {
+      background: var(--green);
+    }
+
+    .decision.no {
+      background: var(--red);
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+      gap: 20px;
+      max-width: 1260px;
+      margin: 0 auto;
+    }
+
+    .options.two {
+      max-width: 940px;
+    }
+
+    .option {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      padding: 13px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .option .preview {
+      width: 100%;
+      height: clamp(190px, 30vh, 295px);
+      border: 0;
+      border-radius: 15px;
+    }
+
+    .option-name {
+      margin: 15px 5px;
+      font-size: clamp(21px, 2vw, 27px);
+      font-weight: 800;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .choose {
+      width: 100%;
+      min-height: 87px;
+      margin-top: auto;
+      padding: 12px 16px;
+      background: var(--forest);
+      border: 0;
+      border-radius: 16px;
+      color: #FFFFFF;
+      font-size: clamp(21px, 2.1vw, 27px);
+      font-weight: 800;
+    }
+
+    .choose:active,
+    .decision:active,
+    .primary:active {
+      transform: scale(0.99);
+    }
+
+    .helper {
+      margin: 23px auto 0;
+      color: var(--muted);
+      font-size: 19px;
+      text-align: center;
+    }
+
+    .notice {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 18px;
+      border: 2px solid #BA7331;
+      border-radius: 16px;
+      background: #FFF2DD;
+      color: #57380D;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .center-screen {
+      display: flex;
+      min-height: 54vh;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      text-align: center;
+      padding: 30px;
+    }
+
+    .center-screen h1 {
+      max-width: 850px;
+    }
+
+    .center-screen p {
+      max-width: 780px;
+      color: var(--muted);
+      font-size: clamp(21px, 2.4vw, 28px);
+    }
+
+    .check {
+      display: grid;
+      place-items: center;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: #DCEDE0;
+      color: var(--forest);
+      font-size: 64px;
+      font-weight: 800;
+    }
+
+    .primary {
+      min-height: 100px;
+      width: min(600px, 100%);
+      padding: 18px 30px;
+      border: 0;
+      border-radius: 20px;
+      background: var(--forest);
+      color: #FFFFFF;
+      font-size: clamp(24px, 2.5vw, 30px);
+      font-weight: 800;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 35px;
+      background: rgba(247, 247, 242, 0.97);
+    }
+
+    .feedback {
+      max-width: 760px;
+      text-align: center;
+    }
+
+    .feedback .check {
+      margin: 0 auto 25px;
+    }
+
+    .feedback h2 {
+      margin: 0 0 17px;
+      font-size: clamp(38px, 5vw, 62px);
+      letter-spacing: -1.5px;
+    }
+
+    .feedback p {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(23px, 3vw, 33px);
+    }
+
+    @media (max-width: 850px), (orientation: portrait) {
+      .shell {
+        padding: 20px;
+      }
+
+      .basic-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .basic-preview {
+        height: 35vh;
+      }
+
+      .basic-actions {
+        flex-direction: row;
+      }
+
+      .decision {
+        min-height: 105px;
+      }
+
+      .options {
+        grid-template-columns: 1fr;
+        max-width: 650px;
+      }
+
+      .option .preview {
+        height: 260px;
+      }
+    }
+
+    @media (max-width: 550px) {
+      header {
+        align-items: flex-start;
+      }
+
+      .progress-bars span {
+        width: 32px;
+      }
+
+      .basic-actions {
+        flex-direction: column;
+      }
+
+      .decision {
+        min-height: 95px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <div class="brand">waldkirche <span>merch.</span></div>
+        <div id="mode" class="mode" hidden>
+          DEMO – KEINE SPEICHERUNG
+        </div>
+      </div>
+
+      <div>
+        <div id="progressLabel" class="progress-label">
+          Abstimmung wird geladen
+        </div>
+        <div id="progressBars" class="progress-bars"
+             aria-hidden="true"></div>
+      </div>
+    </header>
+
+    <section id="content" aria-live="off">
+      <div class="center-screen">
+        <h1>Waldkirche Merch</h1>
+        <p>Die Abstimmung wird vorbereitet …</p>
+      </div>
+    </section>
+
+    <p id="notice" class="notice" role="alert" hidden></p>
+  </main>
+
+  <div id="overlay" class="overlay" hidden>
+    <div class="feedback" role="status" aria-live="polite">
+      <div class="check" aria-hidden="true">✓</div>
+      <h2 id="feedbackTitle"></h2>
+      <p id="feedbackText"></p>
+    </div>
+  </div>
+
+  <script>
+    // =====================================================
+    // 1. KONFIGURATION – HIER DEINE SUPABASE-DATEN EINTRAGEN
+    // =====================================================
+
+    const SUPABASE_URL = "HIER_DEINE_SUPABASE_URL";
+    const SUPABASE_ANON_KEY = "HIER_DEIN_SUPABASE_ANON_KEY";
+
+    // true  = Team-Demo ohne Datenbank und echte Stimmen
+    // false = Live-Abstimmung mit Supabase
+    const DEMO_MODE = true;
+
+    // =====================================================
+    // 2. GRUNDEINSTELLUNGEN
+    // =====================================================
+
+    const STORAGE_KEY = "waldkirche_merch_vote_v1";
+
+    const ORDER = ["basic", "hirte", "wald"];
+
+    const QUESTIONS = {
+      basic: {
+        title: "Würdest du dieses Shirt kaufen?",
+        subtitle: "Waldkirche-Schriftzug als Stickerei"
+      },
+      hirte: {
+        title: "Welches Hirten-Motiv gefällt dir am besten?",
+        subtitle: "Wähle genau eine Variante."
+      },
+      wald: {
+        title: "Welches Wald-Motiv gefällt dir am besten?",
+        subtitle: "Wähle genau eine Variante."
+      }
+    };
+
+    const content = document.getElementById("content");
+    const notice = document.getElementById("notice");
+    const overlay = document.getElementById("overlay");
+    const feedbackTitle = document.getElementById("feedbackTitle");
+    const feedbackText = document.getElementById("feedbackText");
+    const progressLabel = document.getElementById("progressLabel");
+    const progressBars = document.getElementById("progressBars");
+
+    let db = null;
+    let designs = [];
+    let busy = false;
+    let pendingChoice = null;
+
+    let state = {
+      session_id: null,
+      index: 0
+    };
+
+    // =====================================================
+    // 3. DEMO-BILDER
+    // =====================================================
+
+    // Diese SVGs sind nur eindeutig markierte Platzhalter.
+    // Sie sind NICHT die tatsächlichen Waldkirche-Entwürfe.
+
+    function demoImage(label, theme) {
+      const symbols = {
+        basic: `
+          <text x="400" y="310"
+                fill="#214A36"
+                font-family="Arial"
+                font-size="73"
+                font-weight="bold"
+                text-anchor="middle">waldkirche</text>
+          <text x="400" y="350"
+                fill="#516057"
+                font-family="Arial"
+                font-size="22"
+                text-anchor="middle">STICKEREI · BRUST</text>
+        `,
+
+        hirte: `
+          <g fill="none" stroke="#214A36"
+             stroke-width="9" stroke-linecap="round">
+            <path d="M275 282 Q245 225 298 208
+                     Q335 185 360 220
+                     Q406 186 441 218
+                     Q492 205 510 256
+                     Q550 295 493 323
+                     L313 323 Q263 319 275 282Z"/>
+            <path d="M326 323 L323 370
+                     M457 323 L460 370"/>
+            <path d="M510 264 Q551 252 567 288
+                     Q580 324 545 338
+                     Q514 341 510 309Z"/>
+            <path d="M300 195 Q280 146 307 129
+                     M307 129 Q341 107 350 151"/>
+          </g>
+          <circle cx="547" cy="288" r="5" fill="#214A36"/>
+        `,
+
+        wald: `
+          <g fill="none" stroke="#214A36"
+             stroke-width="8" stroke-linecap="round">
+            <path d="M400 365 L400 190"/>
+            <path d="M400 285 L328 228
+                     M400 268 L472 214"/>
+            <path d="M400 365 L345 414
+                     M400 365 L450 419
+                     M400 365 L400 430"/>
+          </g>
+          <path d="M400 100 L265 292 H535 Z"
+                fill="#214A36" opacity=".18"/>
+          <path d="M400 145 L285 322 H515 Z"
+                fill="#214A36" opacity=".25"/>
+          <path d="M400 195 L300 355 H500 Z"
+                fill="#214A36" opacity=".35"/>
+        `
+      };
+
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="800" height="520"
+             viewBox="0 0 800 520">
+          <rect width="800" height="520" fill="#EAEAE2"/>
+          <rect x="18" y="18" width="764" height="484"
+                rx="22" fill="none"
+                stroke="#C3CDC2" stroke-width="3"/>
+          <text x="400" y="65"
+                font-family="Arial" font-size="23"
+                font-weight="bold" text-anchor="middle"
+                fill="#214A36">WALDKIRCHE / DEMO</text>
+
+          ${symbols[theme] || symbols.basic}
+
+          <text x="400" y="464"
+                font-family="Arial" font-size="25"
+                font-weight="bold" text-anchor="middle"
+                fill="#214A36">${label}</text>
+          <text x="400" y="490"
+                font-family="Arial" font-size="16"
+                text-anchor="middle" fill="#516057">
+            PLATZHALTER – KEIN ORIGINALDESIGN
+          </text>
+        </svg>
+      `;
+
+      return "data:image/svg+xml;charset=UTF-8," +
+        encodeURIComponent(svg);
+    }
+
+    function getDemoDesigns() {
+      return [
+        {
+          id: "demo-basic",
+          ballot: "basic",
+          position: 1,
+          project_name: "Waldkirche Basic",
+          image_url: demoImage("BASIC", "basic")
+        },
+        {
+          id: "demo-hirte-1",
+          ballot: "hirte",
+          position: 1,
+          project_name: "Hirte – Variante 1",
+          image_url: demoImage("VARIANTE 1", "hirte")
+        },
+        {
+          id: "demo-hirte-2",
+          ballot: "hirte",
+          position: 2,
+          project_name: "Hirte – Variante 2",
+          image_url: demoImage("VARIANTE 2", "hirte")
+        },
+        {
+          id: "demo-hirte-3",
+          ballot: "hirte",
+          position: 3,
+          project_name: "Hirte – Variante 3",
+          image_url: demoImage("VARIANTE 3", "hirte")
+        },
+        {
+          id: "demo-wald-1",
+          ballot: "wald",
+          position: 1,
+          project_name: "Wald – Variante 1",
+          image_url: demoImage("VARIANTE 1", "wald")
+        },
+        {
+          id: "demo-wald-2",
+          ballot: "wald",
+          position: 2,
+          project_name: "Wald – Variante 2",
+          image_url: demoImage("VARIANTE 2", "wald")
+        },
+        {
+          id: "demo-wald-3",
+          ballot: "wald",
+          position: 3,
+          project_name: "Wald – Variante 3",
+          image_url: demoImage("VARIANTE 3", "wald")
+        }
+      ];
+    }
+
+    // =====================================================
+    // 4. SITZUNG UND DATENBANK
+    // =====================================================
+
+    function newSession() {
+      return {
+        session_id: crypto.randomUUID(),
+        index: 0
+      };
+    }
+
+    function saveState() {
+      if (DEMO_MODE) return;
+
+      try {
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(state)
+        );
+      } catch (error) {
+        console.warn("Sitzung konnte nicht lokal gespeichert werden.");
+      }
+    }
+
+    function restoreState() {
+      if (DEMO_MODE) {
+        state = newSession();
+        return;
+      }
+
+      try {
+        const saved = JSON.parse(
+          localStorage.getItem(STORAGE_KEY)
+        );
+
+        const validSession =
+          saved &&
+          typeof saved.session_id === "string" &&
+          /^[0-9a-f-]{36}$/i.test(saved.session_id) &&
+          Number.isInteger(saved.index) &&
+          saved.index >= 0 &&
+          saved.index <= ORDER.length;
+
+        state = validSession ? saved : newSession();
+      } catch (error) {
+        state = newSession();
+      }
+
+      saveState();
+    }
+
+    function validateDesigns(items) {
+      const count = ballot =>
+        items.filter(item => item.ballot === ballot).length;
+
+      if (
+        count("basic") !== 1 ||
+        count("hirte") < 2 ||
+        count("hirte") > 3 ||
+        count("wald") < 2 ||
+        count("wald") > 3
+      ) {
+        throw new Error(
+          "Benötigt werden genau 1 Basic-Design sowie " +
+          "jeweils 2 oder 3 Hirten- und Wald-Varianten."
+        );
+      }
+
+      for (const item of items) {
+        if (
+          !ORDER.includes(item.ballot) ||
+          !item.project_name ||
+          !item.image_url
+        ) {
+          throw new Error("Ein Design ist unvollständig.");
+        }
+
+        if (!DEMO_MODE) {
+          try {
+            const url = new URL(item.image_url);
+
+            if (url.protocol !== "https:") {
+              throw new Error("Ungültiges Bildprotokoll");
+            }
+          } catch (error) {
+            throw new Error(
+              "Ungültige Bild-URL bei " + item.project_name
+            );
+          }
+        }
+      }
+    }
+
+    async function loadDesigns() {
+      if (DEMO_MODE) {
+        return getDemoDesigns();
+      }
+
+      const { data, error } = await db
+        .from("designs")
+        .select("id, project_name, image_url, ballot, position")
+        .order("position", { ascending: true });
+
+      if (error) throw error;
+
+      return data || [];
+    }
+
+    async function boot() {
+      try {
+        if (!DEMO_MODE) {
+          if (
+            SUPABASE_URL.startsWith("HIER_") ||
+            SUPABASE_ANON_KEY.startsWith("HIER_")
+          ) {
+            throw new Error(
+              "Bitte zuerst die Supabase-Zugangsdaten eintragen."
+            );
+          }
+
+          if (!window.supabase) {
+            throw new Error(
+              "Die Supabase-Bibliothek konnte nicht geladen werden."
+            );
+          }
+
+          db = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY,
+            {
+              auth: {
+                persistSession: false,
+                autoRefreshToken: false,
+                detectSessionInUrl: false
+              }
+            }
+          );
+        }
+
+        designs = await loadDesigns();
+        validateDesigns(designs);
+        restoreState();
+
+        document.getElementById("mode").hidden = !DEMO_MODE;
+
+        render();
+        preloadNext();
+      } catch (error) {
+        renderError(
+          "Die Abstimmung konnte nicht gestartet werden.",
+          error.message,
+          "Erneut versuchen",
+          () => location.reload()
+        );
+      }
+    }
+
+    // =====================================================
+    // 5. HILFSFUNKTIONEN FÜR DIE OBERFLÄCHE
+    // =====================================================
+
+    function element(tag, className, text) {
+      const node = document.createElement(tag);
+
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+
+      return node;
+    }
+
+    function clearNotice() {
+      notice.hidden = true;
+      notice.textContent = "";
+    }
+
+    function showNotice(message) {
+      notice.textContent = message;
+      notice.hidden = false;
+    }
+
+    function setProgress() {
+      const current = state.index;
+
+      progressLabel.textContent =
+        current >= 3
+          ? "Abstimmung abgeschlossen"
+          : `Abstimmung ${current + 1} von 3`;
+
+      progressBars.replaceChildren();
+
+      for (let i = 0; i < 3; i++) {
+        const bar = element("span");
+        if (i <= current) bar.classList.add("active");
+        progressBars.append(bar);
+      }
+    }
+
+    function createIntro(question) {
+      const intro = element("div", "intro");
+
+      intro.append(
+        element("h1", "", question.title),
+        element("p", "subtitle", question.subtitle)
+      );
+
+      return intro;
+    }
+
+    function safeImage(design) {
+      const image = document.createElement("img");
+
+      image.src = design.image_url;
+      image.alt = "Designvorschau: " + design.project_name;
+      image.loading = "eager";
+      image.decoding = "async";
+
+      return image;
+    }
+
+    function preloadNext() {
+      const nextBallot = ORDER[state.index];
+
+      if (!nextBallot) return;
+
+      designs
+        .filter(item => item.ballot === nextBallot)
+        .forEach(item => {
+          const image = new Image();
+          image.src = item.image_url;
+        });
+    }
+
+    function showOverlay(title, message) {
+      feedbackTitle.textContent = title;
+      feedbackText.textContent = message;
+      overlay.hidden = false;
+    }
+
+    function hideOverlay() {
+      overlay.hidden = true;
+    }
+
+    function sleep(milliseconds) {
+      return new Promise(resolve =>
+        setTimeout(resolve, milliseconds)
+      );
+    }
+
+    // =====================================================
+    // 6. ABSTIMMUNGSSEITEN
+    // =====================================================
+
+    function render() {
+      clearNotice();
+      setProgress();
+      content.replaceChildren();
+
+      if (state.index >= ORDER.length) {
+        renderFinished();
+        return;
+      }
+
+      const ballot = ORDER[state.index];
+      const question = QUESTIONS[ballot];
+
+      content.append(createIntro(question));
+
+      const choices = designs
+        .filter(item => item.ballot === ballot)
+        .sort((a, b) => a.position - b.position);
+
+      if (ballot === "basic") {
+        renderBasic(choices[0]);
+      } else {
+        renderOptions(choices);
+      }
+    }
+
+    function renderBasic(design) {
+      const layout = element("div", "basic-layout");
+      const preview = element(
+        "div",
+        "preview basic-preview"
+      );
+
+      const image = safeImage(design);
+      preview.append(image);
+
+      const actions = element("div", "basic-actions");
+
+      const yesButton = element(
+        "button",
+        "decision yes",
+        "👍 Ja, würde ich kaufen"
+      );
+
+      const noButton = element(
+        "button",
+        "decision no",
+        "👎 Nein, eher nicht"
+      );
+
+      yesButton.type = "button";
+      noButton.type = "button";
+
+      yesButton.addEventListener("click", () =>
+        castVote(design, "ja")
+      );
+
+      noButton.addEventListener("click", () =>
+        castVote(design, "nein")
+      );
+
+      image.onerror = () => {
+        yesButton.disabled = true;
+        noButton.disabled = true;
+
+        showNotice(
+          "Das Basic-Design kann nicht angezeigt werden. " +
+          "Bitte das Team informieren."
+        );
+      };
+
+      actions.append(yesButton, noButton);
+      layout.append(preview, actions);
+
+      content.append(layout);
+      content.append(
+        element(
+          "p",
+          "helper",
+          "Tippe einfach auf eine der beiden Antworten."
+        )
+      );
+    }
+
+    function renderOptions(choices) {
+      const grid = element("div", "options");
+
+      grid.style.setProperty(
+        "--cols",
+        String(choices.length)
+      );
+
+      if (choices.length === 2) {
+        grid.classList.add("two");
+      }
+
+      for (const design of choices) {
+        const card = element("article", "option");
+        const preview = element("div", "preview");
+        const image = safeImage(design);
+
+        const name = element(
+          "div",
+          "option-name",
+          design.project_name
+        );
+
+        const button = element(
+          "button",
+          "choose",
+          `Variante ${design.position} wählen`
+        );
+
+        button.type = "button";
+        button.setAttribute(
+          "aria-label",
+          design.project_name + " auswählen"
+        );
+
+        button.addEventListener("click", () =>
+          castVote(design, "ja")
+        );
+
+        image.onerror = () => {
+          button.disabled = true;
+
+          showNotice(
+            "Mindestens ein Motivbild kann nicht angezeigt " +
+            "werden. Bitte vor der Abstimmung das Team informieren."
+          );
+        };
+
+        preview.append(image);
+        card.append(preview, name, button);
+        grid.append(card);
+      }
+
+      content.append(grid);
+      content.append(
+        element(
+          "p",
+          "helper",
+          "Jede Person hat eine Stimme für dieses Motiv."
+        )
+      );
+    }
+
+    // =====================================================
+    // 7. STIMME SPEICHERN
+    // =====================================================
+
+    async function castVote(design, voteType) {
+      if (busy) return;
+
+      const ballot = ORDER[state.index];
+
+      // Nach einem unklaren Netzwerkfehler darf nur
+      // dieselbe Auswahl erneut gesendet werden.
+      if (
+        pendingChoice &&
+        (
+          pendingChoice.design.id !== design.id ||
+          pendingChoice.voteType !== voteType ||
+          pendingChoice.ballot !== ballot
+        )
+      ) {
+        return;
+      }
+
+      pendingChoice = {
+        design,
+        voteType,
+        ballot
+      };
+
+      busy = true;
+
+      // Sofortige Rückmeldung, bevor der Server antwortet.
+      showOverlay(
+        "Stimme wird gespeichert …",
+        "Bitte einen kurzen Moment warten."
+      );
+
+      try {
+        if (!DEMO_MODE) {
+          const { error } = await db
+            .from("votes")
+            .insert({
+              session_id: state.session_id,
+              ballot: ballot,
+              design_id: design.id,
+              vote_type: voteType
+            });
+
+          // 23505 = Unique-Verletzung.
+          // Dieselbe Sitzung hat für diese Kategorie
+          // bereits eine Stimme gespeichert.
+          // Wichtig bei einer Wiederholung nach Timeout.
+          if (error && error.code !== "23505") {
+            throw error;
+          }
+        }
+
+        // Erst nach erfolgreichem Speichern weitergehen.
+        state.index++;
+        saveState();
+
+        pendingChoice = null;
+
+        showOverlay(
+          "Vielen Dank!",
+          DEMO_MODE
+            ? "Demo: Es wurde keine echte Stimme gespeichert."
+            : "Deine Stimme wurde gespeichert."
+        );
+
+        // Die Bilder der nächsten Abstimmung vorbereiten.
+        preloadNext();
+
+        // Zwei Sekunden Dankeschön anzeigen.
+        await sleep(2000);
+
+        hideOverlay();
+        render();
+
+      } catch (error) {
+        console.error("Fehler beim Speichern:", error);
+
+        hideOverlay();
+
+        renderError(
+          "Die Speicherung konnte nicht bestätigt werden.",
+          "Deine Auswahl bleibt erhalten. " +
+          "Bitte versuche, dieselbe Stimme erneut zu speichern.",
+          "Stimme erneut speichern",
+          () => {
+            if (pendingChoice) {
+              castVote(
+                pendingChoice.design,
+                pendingChoice.voteType
+              );
+            }
+          }
+        );
+
+      } finally {
+        busy = false;
+      }
+    }
+
+    // =====================================================
+    // 8. ABSCHLUSS UND NÄCHSTE PERSON
+    // =====================================================
+
+    function renderFinished() {
+      const screen = element("div", "center-screen");
+
+      screen.append(
+        element("div", "check", "✓"),
+        element(
+          "h1",
+          "",
+          "Alle Designs bewertet. Vielen Dank!"
+        ),
+        element(
+          "p",
+          "",
+          DEMO_MODE
+            ? "Die Demo ist abgeschlossen. Es wurden " +
+              "keine Stimmen in einer Datenbank gespeichert."
+            : "Deine drei Entscheidungen wurden aufgenommen. " +
+              "Vielen Dank für deine Teilnahme!"
+        )
+      );
+
+      const button = element(
+        "button",
+        "primary",
+        "Abstimmung für nächste Person starten"
+      );
+
+      button.type = "button";
+      button.addEventListener("click", resetVoting);
+
+      screen.append(button);
+      content.append(screen);
+    }
+
+    function resetVoting() {
+      if (busy) return;
+
+      pendingChoice = null;
+
+      // Neue Sitzungs-ID für die nächste Person.
+      state = newSession();
+      saveState();
+
+      render();
+      preloadNext();
+    }
+
+    function renderError(title, message, buttonText, retry) {
+      clearNotice();
+
+      const screen = element("div", "center-screen");
+
+      screen.append(
+        element("h1", "", title),
+        element("p", "", message)
+      );
+
+      const button = element(
+        "button",
+        "primary",
+        buttonText
+      );
+
+      button.type = "button";
+      button.addEventListener("click", retry);
+
+      screen.append(button);
+      content.replaceChildren(screen);
+    }
+
+    // =====================================================
+    // 9. APP STARTEN
+    // =====================================================
+
+    boot();
+  </script>
+</body>
+</html>
